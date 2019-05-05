@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
@@ -10,6 +11,10 @@ import (
 const (
 	screenWidth  = 800
 	screenHeight = 600
+)
+
+const (
+	tileSize  = 10 
 )
 
 func update(screen *ebiten.Image) error {
@@ -25,7 +30,9 @@ func update(screen *ebiten.Image) error {
 }
 
 func main() {
-	if err := ebiten.Run(update, screenWidth, screenHeight, 2, "Hello, World!"); err != nil {
+	board := NewBoard(0, 0, 10, 4)
+	fmt.Println(board)
+	if err := ebiten.Run(update, screenWidth, screenHeight, 1, "Hello, World!"); err != nil {
 		log.Fatal(err)
 	}
 }
