@@ -1,12 +1,13 @@
 package main
 
 import (
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"fmt"
 	"log"
 	// "image"
 	// "image/color"
 	"github.com/hajimehoshi/ebiten"
-	// "github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 const (
@@ -21,8 +22,10 @@ var (
 
 func update(screen *ebiten.Image) error {
 	// updating game state
-	// -------------------
-
+	currX, currY := ebiten.CursorPosition()
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		board.SelectTile(currX, currY)
+	}
 	// is drawing skipped
 	if ebiten.IsDrawingSkipped() {
 		return nil
@@ -30,15 +33,25 @@ func update(screen *ebiten.Image) error {
 
 	// drawing
 	board.Draw(screen)
-	// ebitenutil.DebugPrint(screen, "Hello, World!")
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("x: %v, y: %v", currX, currY))
 	return nil
 }
 
 func main() {
+	mask := [][]int{
+		{1, 0, 0, 0, 0, 0},
+		{0, 1, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0},
+	}
 	tileNum := 6
-	board = NewBoard(0, 0, tileNum, int(screenHeight * 0.8) / tileNum, 6)
+	offset := int(screenHeight * 0.1)
+	board = NewBoard(offset, offset, tileNum, int(screenHeight * 0.8) / tileNum)
+	board.Initialize(mask)
 	fmt.Println(board)
-	if err := ebiten.Run(update, screenWidth, screenHeight, 1, "Hello, World!"); err != nil {
+	if err := ebiten.Run(update, screenWidth, screenHeight, 1, "AmazonsGo"); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -10,27 +10,67 @@ var (
 	tileColor = color.RGBA{0xff, 0xff, 0xf0, 0xff}
 )
 
+type gameObject struct {
+	posX, posY int
+}
+
+func (g gameObject) String() string {
+	return fmt.Sprintf("(%v, %v)", g.posX, g.posY)
+}
+
+// Piece is a player's piece
+type Piece struct {
+	gameObject
+}
+
+// Arrow object
+type Arrow struct {
+	gameObject
+}
+
 // Board of a game
 type Board struct {
-	PosX, PosY float64
-	Pieces     []Piece
+	gameObject
+	Pieces     [][]*Piece
 	tileSize   int
 	tileNum    int
 }
 
 // NewBoard creates a new gameboard
-func NewBoard(posx, posy float64, tilenum, tilesize, n int) Board {
+func NewBoard(posx, posy, tilenum, tilesize int) Board {
 	return Board{
-		PosX:   posx,
-		PosY:   posy,
-		Pieces: make([]Piece, n),
-		tileNum:  tilenum,
-		tileSize: tilesize,
+		gameObject: gameObject {posX: posx, posY: posy},
+		Pieces: 	make([][]*Piece, tilenum),
+		tileNum:  	tilenum,
+		tileSize: 	tilesize,
+	}
+}
+
+// Initialize state of a board
+func (b Board) Initialize(mask [][]int) {
+	// b.Pieces := make([][]Piece, b.tileNum)
+	for i := 0; i < b.tileNum; i++{
+		b.Pieces[i] = make([]*Piece, b.tileNum)
+		for j := 0; j < b.tileNum; j++{
+			switch mask[i][j] {
+			case 0:
+				b.Pieces[i][j] = nil
+			case 1:
+				b.Pieces[i][j] = &Piece{gameObject{i, j}}
+			}
+			}
 	}
 }
 
 func (b Board) String() string {
-	return fmt.Sprintf("x: %v, y: %v, \npieces: %+v", b.PosX, b.PosY, b.Pieces)
+	return fmt.Sprintf("x: %v, y: %v, \npieces: %v", b.posX, b.posY, b.Pieces)
+}
+
+// SelectTile of a gameboard
+func (b Board) SelectTile(x, y int) {
+	i := (x - b.posX) / b.tileSize
+	j := (y - b.posY) / b.tileSize
+	fmt.Printf("i: %v, j: %v\n", i, j)
 }
 
 // Draw a gameboard
