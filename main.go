@@ -13,7 +13,6 @@ import (
 const (
 	screenWidth  = 800
 	screenHeight = 800
-
 )
 
 var (
@@ -24,7 +23,11 @@ func update(screen *ebiten.Image) error {
 	// updating game state
 	currX, currY := ebiten.CursorPosition()
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		board.SelectTile(currX, currY)
+		i, j := board.SelectTile(currX, currY)
+		if board.Pieces[i][j] != nil {
+			// make selections
+			fmt.Printf("%v %v", i, j)
+		}
 	}
 	// is drawing skipped
 	if ebiten.IsDrawingSkipped() {
@@ -39,12 +42,12 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 	mask := [][]int{
-		{1, 0, 0, 0, 0, 0},
-		{0, 1, 0, 0, 0, 0},
-		{0, 0, 1, 0, 0, 0},
+		{0, 0, 1, 2, 0, 0},
 		{0, 0, 0, 0, 0, 0},
+		{2, 0, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 2},
 		{0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0},
+		{0, 0, 2, 1, 0, 0},
 	}
 	tileNum := 6
 	offset := int(screenHeight * 0.1)

@@ -21,6 +21,7 @@ func (g gameObject) String() string {
 // Piece is a player's piece
 type Piece struct {
 	gameObject
+	WhitePlayer bool
 }
 
 // Arrow object
@@ -32,6 +33,7 @@ type Arrow struct {
 type Board struct {
 	gameObject
 	Pieces     [][]*Piece
+	Arrows	   [][]*Arrow // (???)
 	tileSize   int
 	tileNum    int
 }
@@ -56,21 +58,24 @@ func (b Board) Initialize(mask [][]int) {
 			case 0:
 				b.Pieces[i][j] = nil
 			case 1:
-				b.Pieces[i][j] = &Piece{gameObject{i, j}}
+				b.Pieces[i][j] = &Piece{gameObject{i, j}, true}
+			case 2:
+				b.Pieces[i][j] = &Piece{gameObject{i, j}, false}
 			}
 			}
 	}
 }
 
 func (b Board) String() string {
-	return fmt.Sprintf("x: %v, y: %v, \npieces: %v", b.posX, b.posY, b.Pieces)
+	return fmt.Sprintf("x: %v, y: %v\npieces:\n%v", b.posX, b.posY, Matrix2String(b.Pieces))
 }
 
 // SelectTile of a gameboard
-func (b Board) SelectTile(x, y int) {
-	i := (x - b.posX) / b.tileSize
-	j := (y - b.posY) / b.tileSize
+func (b Board) SelectTile(x, y int) (i, j int){
+	i = (x - b.posX) / b.tileSize
+	j = (y - b.posY) / b.tileSize
 	fmt.Printf("i: %v, j: %v\n", i, j)
+	return
 }
 
 // Draw a gameboard
