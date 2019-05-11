@@ -33,7 +33,8 @@ type Arrow struct {
 type Board struct {
 	gameObject
 	Pieces     [][]*Piece
-	Arrows	   []*Arrow // (???)
+	Arrows	   [][]*Arrow // (???)
+	Selection  [][]bool
 	tileSize   int
 	tileNum    int
 }
@@ -43,6 +44,8 @@ func NewBoard(posx, posy, tilenum, tilesize int) Board {
 	return Board{
 		gameObject: gameObject {posX: posx, posY: posy},
 		Pieces: 	make([][]*Piece, tilenum),
+		Arrows: 	make([][]*Arrow, tilenum),
+		Selection:  make([][]bool, tilenum),
 		tileNum:  	tilenum,
 		tileSize: 	tilesize,
 	}
@@ -50,10 +53,13 @@ func NewBoard(posx, posy, tilenum, tilesize int) Board {
 
 // Initialize state of a board
 func (b Board) Initialize(mask [][]int) {
-	// b.Pieces = make([][]*Piece, b.tileNum)
 	for i := 0; i < b.tileNum; i++{
-		b.Pieces[i] = make([]*Piece, b.tileNum)
+		b.Selection[i] = make([]bool, b.tileNum)
+		b.Pieces[i]    = make([]*Piece, b.tileNum)
+		b.Arrows[i]    = make([]*Arrow, b.tileNum)
 		for j := 0; j < b.tileNum; j++{
+			b.Selection[i][j] = false
+			b.Arrows[i][j] = nil
 			switch mask[i][j] {
 			case 0:
 				b.Pieces[i][j] = nil
@@ -70,11 +76,18 @@ func (b Board) String() string {
 	return fmt.Sprintf("x: %v, y: %v\npieces:\n%v", b.posX, b.posY, Matrix2String(b.Pieces))
 }
 
+func (b Board) isValidTile(i, j int) bool {
+	fmt.Printf("%v %v\n", i, j)
+	if b.Pieces[i][j] == nil {// && b.Arrows[i][j] == nil{
+		return true
+	}
+	return false
+}
+
 // Coor2Ind return index of a tile
 func (b Board) Coor2Ind(x, y int) (i, j int){
 	i = (x - b.posX) / b.tileSize
 	j = (y - b.posY) / b.tileSize
-	fmt.Printf("i: %v, j: %v\n", i, j)
 	return
 }
 
@@ -85,6 +98,35 @@ func (b Board) Ind2Coor(i, j int) (x, y int){
 	return
 }
 
+// MakeSelection selects all possible tiles for a move
+func (b Board) MakeSelection(i, j int) {
+	for k := 0; k < b.tileNum; k++ {
+		b.Selection[k][j] = b.isValidTile(k, j)
+	}
+	for k := 0; k < b.tileNum; k++ {
+		b.Selection[i][k] = b.isValidTile(i, k)
+	}
+	// tmp1, tmp2 := i, j
+	// for k := 0; k < b.tileNum; k++ {
+	// 	i = (i + 1) % b.tileNum
+	// 	j = (j + 1) % b.tileNum
+
+	// 	tmp1 = (tmp1 + 1) % b.tileNum
+	// 	tmp2 = (tmp2 - 1) % b.tileNum
+
+	// 	b.Selection[i][j] = b.isValidTile(i, j)
+	// 	b.Selection[tmp1][tmp2] = b.isValidTile(tmp1, tmp2)
+	// }
+}
+
+// ClearSelection on a gameboard
+func (b Board) ClearSelection() {
+	for i := 0; i < b.tileNum; i++{
+		for j := 0; j < b.tileNum; j++ {
+			b.Selection[i][j] = false
+		}
+	}
+}
 
 // Draw a gameboard
 func (b Board) Draw(screen *ebiten.Image) {
@@ -97,11 +139,15 @@ func (b Board) Draw(screen *ebiten.Image) {
 	
 	for i := 0; i < b.tileNum; i++{
 		for j:= 0; j < b.tileNum; j++{
+			x, y := b.Ind2Coor(i, j)
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Scale(0.98, 0.98)
-			x, y := b.Ind2Coor(i, j)
 			op.GeoM.Translate(float64(x), float64(y))
 			screen.DrawImage(tileImage, op)
+			if b.Selection[i][j]{
+				op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+				screen.DrawImage(tileImage,op)
+			}
 		}
 	}
 }
