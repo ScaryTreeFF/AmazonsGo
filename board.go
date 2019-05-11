@@ -33,7 +33,7 @@ type Arrow struct {
 type Board struct {
 	gameObject
 	Pieces     [][]*Piece
-	Arrows	   [][]*Arrow // (???)
+	Arrows	   []*Arrow // (???)
 	tileSize   int
 	tileNum    int
 }
@@ -50,7 +50,7 @@ func NewBoard(posx, posy, tilenum, tilesize int) Board {
 
 // Initialize state of a board
 func (b Board) Initialize(mask [][]int) {
-	// b.Pieces := make([][]Piece, b.tileNum)
+	// b.Pieces = make([][]*Piece, b.tileNum)
 	for i := 0; i < b.tileNum; i++{
 		b.Pieces[i] = make([]*Piece, b.tileNum)
 		for j := 0; j < b.tileNum; j++{
@@ -70,13 +70,21 @@ func (b Board) String() string {
 	return fmt.Sprintf("x: %v, y: %v\npieces:\n%v", b.posX, b.posY, Matrix2String(b.Pieces))
 }
 
-// SelectTile of a gameboard
-func (b Board) SelectTile(x, y int) (i, j int){
+// Coor2Ind return index of a tile
+func (b Board) Coor2Ind(x, y int) (i, j int){
 	i = (x - b.posX) / b.tileSize
 	j = (y - b.posY) / b.tileSize
 	fmt.Printf("i: %v, j: %v\n", i, j)
 	return
 }
+
+// Ind2Coor return coord of a tile
+func (b Board) Ind2Coor(i, j int) (x, y int){
+	x = i * b.tileSize + b.posX
+	y = j * b.tileSize + b.posY
+	return
+}
+
 
 // Draw a gameboard
 func (b Board) Draw(screen *ebiten.Image) {
@@ -86,12 +94,13 @@ func (b Board) Draw(screen *ebiten.Image) {
 
 	tileImage, _ := ebiten.NewImage(b.tileSize, b.tileSize, ebiten.FilterDefault)
 	tileImage.Fill(tileColor)
-	offset := float64(screenWidth - b.tileSize * b.tileNum) / 2
+	
 	for i := 0; i < b.tileNum; i++{
 		for j:= 0; j < b.tileNum; j++{
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Scale(0.98, 0.98)
-			op.GeoM.Translate(offset+float64(b.tileSize*i), offset+float64(b.tileSize*j))
+			x, y := b.Ind2Coor(i, j)
+			op.GeoM.Translate(float64(x), float64(y))
 			screen.DrawImage(tileImage, op)
 		}
 	}

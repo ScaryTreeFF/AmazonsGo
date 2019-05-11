@@ -23,10 +23,12 @@ func update(screen *ebiten.Image) error {
 	// updating game state
 	currX, currY := ebiten.CursorPosition()
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		i, j := board.SelectTile(currX, currY)
+		i, j := board.Coor2Ind(currX, currY)
 		if board.Pieces[i][j] != nil {
 			// make selections
 			fmt.Printf("%v %v", i, j)
+			x, y := board.Ind2Coor(i, j)
+			fmt.Printf("x: %v, y: %v", x, y)
 		}
 	}
 	// is drawing skipped
